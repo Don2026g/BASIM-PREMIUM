@@ -2,7 +2,8 @@
     package="com.basim.premium.ai">
     <application
         android:label="BASIM PREMIUM AI"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:name="${applicationName}">
         <activity
             android:name=".MainActivity"
             android:exported="true"
