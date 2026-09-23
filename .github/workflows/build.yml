@@ -1,0 +1,67 @@
+name: Build BASIM PREMIUM Flutter APK
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Android directory
+        shell: bash
+        run: |
+          set -e
+          echo "Checking Android directory..."
+          test -d android
+          test -d android/app
+          test -d android/gradle
+          test -f android/settings.gradle
+          test -f android/app/build.gradle
+          test -f android/gradle.properties
+          test -f android/gradlew
+          test -f android/gradle/wrapper/gradle-wrapper.properties
+          echo "Android directory is present and valid."
+
+      - name: Set up Java 17 (Root Fix)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Verify Java 17
+        shell: bash
+        run: |
+          set -e
+          echo "JAVA_HOME=$JAVA_HOME"
+          java -version
+          JAVA_MAJOR=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1)
+          if [ "$JAVA_MAJOR" != "17" ]; then
+            echo "ERROR: Java 17 is required. Found version: $JAVA_MAJOR"
+            exit 1
+          fi
+          echo "Java 17 verified successfully."
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x'
+          channel: 'stable'
+
+      - name: Get Flutter packages
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Notify Developer
+        run: echo "Build complete for dlodlal82@gmail.com"
