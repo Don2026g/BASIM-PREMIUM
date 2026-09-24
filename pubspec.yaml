@@ -9,10 +9,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^1.1.0
+  media_kit: ^1.1.10
+  media_kit_video: ^1.2.4
+  media_kit_libs_android_video: ^1.2.4
+  shared_preferences: ^2.2.2
+  android_intent_plus: ^4.0.3
+  url_launcher: ^6.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
