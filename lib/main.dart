@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:android_intent_plus/android_intent.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
