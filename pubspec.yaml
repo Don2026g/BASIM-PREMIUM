@@ -15,7 +15,10 @@ dependencies:
   media_kit_libs_android_video: ^1.2.4
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.1
-
+  cached_network_image: ^3.4.1
+  chewie: ^1.11.3
+  video_player: ^2.10.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
