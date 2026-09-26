@@ -12,7 +12,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
+    }flutter pub add httpflutter --version
 
     kotlinOptions {
         jvmTarget = '1.8'
@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId "com.basim.premium.ai"
-        minSdk 21
+        minSdkVersion flutter.minSdkVersion
         targetSdk 34
         versionCode flutter.versionCode
         versionName flutter.versionName
