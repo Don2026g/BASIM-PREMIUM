@@ -92,10 +92,131 @@ class _BasimLoginPortalState extends State<BasimLoginPortal> {
 int _type = 0; final TextEditingController _url = TextEditingController(), _user = TextEditingController(), _pass = TextEditingController();
 final FocusNode _fUrl = FocusNode(), _fUser = FocusNode(), _fPass = FocusNode(), _fBtn = FocusNode(); bool _load = false; String _err = "";
 void _submit() async {
-if (_url.text.isEmpty || (_type != 1 && (_user.text.isEmpty || _pass.text.isEmpty))) { setState(() => _err = "أدخل البيانات المطلوبة."); return; }
-setState(() { _load = true; _err = ""; }); await Future.delayed(const Duration(seconds: 1));
-final p = await SharedPreferences.getInstance(); await p.setInt('login_type', _type); await p.setString('saved_url', _url.text); await p.setString('xtream_user', _user.text); await p.setString('xtream_pass', _pass.text);
-if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const BasimDashboardScreen()));
+  if (_url.text.isEmpty ||
+      (_type != 1 &&
+          (_user.text.isEmpty || _pass.text.isEmpty))) {
+    setState(() => _err = "أدخل البيانات المطلوبة.");
+    return;
+  }
+
+  setState(() {
+    _load = true;
+    _err = "";
+  });
+
+  try {
+    final serverUrl =
+        _url.text.trim().replaceFirst(RegExp(r'/+$'), '');
+
+    final username = _user.text.trim();
+    final password = _pass.text.trim();
+
+    final baseUri = Uri.parse(serverUrl);
+
+    final apiUri = baseUri.replace(
+      path:
+          '${baseUri.path.replaceFirst(RegExp(r'/+$'), '')}/player_api.php',
+      queryParameters: {
+        'username': username,
+        'password': password,
+      },
+    );
+
+    final response = await http
+        .get(apiUri)
+        .timeout(const Duration(seconds: 15));
+
+    if (response.statusCode != 200) {
+      if (!mounted) return;
+      setState(() {
+        _load = false;
+        _err = "تعذر الاتصال بالسيرفر.";
+      });
+      return;
+    }
+
+    final dynamic data = jsonDecode(response.body);
+
+    if (data is! Map<String, dynamic>) {
+      if (!mounted) return;
+      setState(() {
+        _load = false;
+        _err = "رد السيرفر غير صالح.";
+      });
+      return;
+    }
+
+    final userInfo = data['user_info'];
+
+    if (userInfo is! Map<String, dynamic>) {
+      if (!mounted) return;
+      setState(() {
+        _load = false;
+        _err = "لم يتم العثور على بيانات الاشتراك.";
+      });
+      return;
+    }
+
+    final auth = userInfo['auth'];
+    final status = userInfo['status']?.toString().toLowerCase();
+
+    if (auth == 0 ||
+        status == 'disabled' ||
+        status == 'banned' ||
+        status == 'expired') {
+      if (!mounted) return;
+      setState(() {
+        _load = false;
+        _err = "الاشتراك غير صالح أو منتهي.";
+      });
+      return;
+    }
+
+    final p = await SharedPreferences.getInstance();
+
+    await p.setInt('login_type', _type);
+    await p.setString('saved_url', serverUrl);
+    await p.setString('xtream_user', username);
+    await p.setString('xtream_pass', password);
+    await p.setString(
+      'xtream_user_info',
+      jsonEncode(userInfo),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _load = false;
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (c) => const BasimDashboardScreen(),
+      ),
+    );
+  } on TimeoutException {
+    if (!mounted) return;
+
+    setState(() {
+      _load = false;
+      _err = "انتهت مهلة الاتصال بالسيرفر.";
+    });
+  } on FormatException {
+    if (!mounted) return;
+
+    setState(() {
+      _load = false;
+      _err = "السيرفر أرسل استجابة غير مفهومة.";
+    });
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      _load = false;
+      _err = "فشل الاتصال بالسيرفر.";
+    });
+  }
 }
 @override Widget build(BuildContext context) {
 return Scaffold(
